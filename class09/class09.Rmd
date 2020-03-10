@@ -1,0 +1,180 @@
+---
+title: "class09"
+author: "DongSu Kim"
+date: "2/4/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#class 09 ; k-mean clustering
+The main k-means function in R is called 'kmeans()'. 
+```{r}
+tmp <- c(rnorm(30,-3), rnorm(30,3))
+x <- cbind(x=tmp, y=rev(tmp))
+plot(x)
+
+
+```
+Use the kmeans() function setting k to 2 and nstart=20
+
+Inspect/print the results
+
+
+```{r}
+km <- kmeans(x, centers=2, nstart=20)
+km
+```
+Q. How many points are in each cluster?
+ -> 30 points for each cluster 
+ 
+```{r}
+#cluster size
+km$size
+
+#cluster assignment and membership 
+km$cluster
+
+length(km$cluster)
+
+table(km$cluster)
+```
+ 
+Q. What ‘component’ of your result object details
+ - cluster size? ->30,30
+ - cluster assignment/membership? -> 
+ - cluster center? -> k=2
+ 
+```{r}
+# plot x colored by the kmenas cluster assignment 
+plot(x, col=km$cluster+1)
+
+#plot x adding cluster cneters as blue point 
+points(km$centers, col="blue", pch=15, cex=3 )
+```
+
+Plot x colored by the kmeans cluster assignment and
+ add cluster centers as blue points
+ 
+ 
+ ## Hierarchiacal clustering in R 
+ 
+ The main Hiererchaicl clustering functin in R is called 'hclust()'
+ 
+ An important point here is that you have to calculate the distance matrix your input data before calling 'hclust()'. 
+ 
+```{r}
+# we will use our x again from above ... 
+#calculate the distance matrix first 
+d <- dist(x)
+hc <- hclust(d)
+hc
+```
+Folks often viuew the result of Hierarchical clustering graphicaly,
+lets try passing this to the 'plot()' function. 
+
+```{r}
+plot(hc)
+abline(h=6, col="red", lty =2 )
+abline(h=4, col="blue", lty=1)
+```
+the cluster 1 shows that 1-30 and cluster 2 shows 31-60 in the dendrogram 
+
+
+# To get cluster membership vector I need to "cut" the tree at a certain height to yield my seperate cluster branches 
+```{r}
+cutree(hc, h=6)
+```
+```{r}
+gp4 <- cutree(hc, k=6)
+table(gp4)
+```
+
+
+Let's try with some more real like data... 
+```{r}
+# Step 1. Generate some example data for clustering
+x <- rbind(
+ matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2), # c1
+ matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2
+ matrix(c(rnorm(50, mean = 1, sd = 0.3), # c3
+ rnorm(50, mean = 0, sd = 0.3)), ncol = 2))
+colnames(x) <- c("x", "y")
+# Step 2. Plot the data without clustering
+plot(x)
+# Step 3. Generate colors for known clusters
+# (just so we can compare to hclust results)
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+```
+
+Q. Use the 'dist()', 'hclust()', 'plot()' and 'cutree()' functions to return 2 and 3 clusters
+
+```{r}
+hc <- hclust(dist(x))
+plot(hc)
+abline(h=1.7, col="red")
+```
+
+to get cluster membership vectors use 'cutree()' and then use 'table()' to tabulate up how many memebers in each cluster we have. 
+```{r}
+grps <- cutree(hc, k=3)
+table(grps)
+```
+
+Make a plot with our cluster results 
+```{r}
+plot(x, col=grps)
+```
+There is no overlapping between two clusters 
+
+Q. How does this compare to your known 'col' groups?
+
+
+# PCA data anaylsis (https://bioboot.github.io/bggn213_W19/class-material/lab-8-bggn213.html)
+We shall say that the 17 food types are the variables and the 4 countries are the observations. This would be equivalent to our samples and genes respectively from the lecture example (and indeed the second main example further below).
+
+Lets read this data from the provided UK_foods.csv input file (note we placed this file in a data sub-directory within or working R studio project directory.
+```{r}
+x <- read.csv("UK_foods.csv", row.names = 1 )
+x
+```
+Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+
+## Complete the following code to find out how many rows and columns are in x?
+```{r}
+dim(x)
+nrow(x)
+ncol(x)
+```
+ 
+ Let's make some plots to explore our data a bit more
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+A "pairs" plot can help when we have small datasets like this one but often we are deaing with data that is too large for 
+```{r}
+pairs(x, col=rainbow(10), pch=2)
+```
+ 
+ 
+Principal Component Analysis (PCA) with the 'prcomp()' function. 
+```{r}
+pca <- prcomp(t(x))
+summary(pca)
+#pca 
+
+```
+ 
+What is in my resut object 'pca'? I can cehck the attibutes  
+```{r}
+attributes(pca)
+```
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x), col=c("black","red","blue","green"))
+```
+ 

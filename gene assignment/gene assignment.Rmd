@@ -1,0 +1,46 @@
+---
+title: "gene assgnment"
+author: "DongSu Kim"
+date: "3/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(bio3d)
+```
+```{r}
+aln <- read.fasta("alignment.fa")
+```
+
+```{r}
+matrix <- seqidentity(aln, normalize=TRUE, similarity=FALSE, ncore=1, nseg.scale=1)
+matrix
+```
+
+
+
+```{r}
+heatmap(matrix, margins = c(13.9,10))
+```
+
+
+```{r}
+consensus(aln)
+```
+
+```{r}
+rowSums(matrix)
+```
+
+too much gap when i do consensus 
+row sum and pikc the highest one 
+and the n pBD serach on that seuqence 
+
+```{r}
+blast.pdb(aln)
+```
+

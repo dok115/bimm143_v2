@@ -1,0 +1,78 @@
+---
+title: "Class: Structural Bioinformatics pt. 1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## PDB statistics
+
+Here we inspect the types of structures in the main database for 3D biomlecular data - the PDB 
+
+Download a CSV file from the PDB site (accessible from “Analyze” -> “PDB Statistics” >
+“by Experimental Method and Molecular Type”. Move this CSV file into your RStudio project
+and
+```{r}
+#read in file
+stats <- read.csv("Data Export Summary.csv", row.names = 1)
+```
+
+>Q1:Determine the percentage of structures solved by X-Ray and Electron Microscopy.
+
+```{r}
+#calculate percentage vlaues asked for 
+ans <- stats$Total /sum(stats$Total) * 100
+names(ans) <- rownames(stats)
+round(ans, 2)
+
+```
+
+
+>Q2 Also can you determine what proportion of structures are protein? Aim to have a rendered GitHub document with working code that yields your answers.
+
+```{r}
+round(sum(stats$Proteins) / sum(stats$Total) * 100,2)
+```
+
+
+>Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+1289 of HIV-1 protease 
+
+
+#Part 2 
+
+Read a single PDB structue into R
+```{r}
+library(bio3d)
+
+pdb <- read.pdb("1hsg")
+pdb
+```
+
+```{r}
+attributes(pdb)
+```
+
+```{r}
+pdb$atom
+```
+
+##Select pretein only atoms
+Here I will use the 'atom.select()' function to do this ... 
+pdb <- READ.PDB("PBDID like '1HSG'")
+Atom.select(pdb, other arguments ... )
+
+```{r}
+prt <- atom.select(pdb, "protein", value =TRUE)
+lig <- atom.select(pdb,"ligand", value = TRUE)
+```
+And write out these new PDB onjects with the 'write.pdb()' function
+```{r}
+write.pdb(lig, file="1hsg_ligand.pdb")
+write.pdb(prt, file="1hsg_protein.pdb")
+```
+
+

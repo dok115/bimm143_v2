@@ -1,0 +1,215 @@
+---
+title: "class7"
+author: "DongSu Kim"
+date: "1/28/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Source
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+
+These are functons here
+```{r}
+rescale <- function(x, na.rm=TRUE, plot=FALSE, ...) {
+  # Our rescale function from the end of lecture 9
+
+  if(na.rm) {
+    rng <-range(x, na.rm=TRUE)
+  } else {
+    rng <-range(x)
+  }
+
+  answer <- (x - rng[1]) / (rng[2] - rng[1])
+  if(plot) { 
+    plot(answer, ...) 
+  }
+
+  return(answer)
+}
+```
+! = NOT
+
+```{r}
+rescale2 <- function(x, na.rm=TRUE, plot=FALSE, ...) {
+ if( !is.numeric(x) ) {
+ stop("Input x should be numeric", call.=FALSE)
+ }
+ rng <-range(x, na.rm=na.rm)
+
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ if(plot) {
+ plot(answer, ...)
+ }
+ return(answer)
+}
+
+```
+
+new value
+```{r}
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+```
+
+is.na = helps found missing values -> pick out na 
+```{r}
+is.na(x)
+
+typeof(is.na(x))
+```
+
+function that both there is no numeric value 
+```{r}
+is.na(x) & is.na(y)
+```
+
+so Function: 
+```{r}
+is_both_na <- function(x,y){
+  is.na(x) & is.na(y)
+}
+
+is_both_na(x,y)
+```
+
+new problem when z -> function break
+
+```{r}
+z <- c(1,1)
+is_both_na(x,z)
+```
+
+NEW FUNCTION CHANGE to stop the function
+```{r}
+is_both_na <- function(x,y){
+  if(length(x) != length(z)){
+    stop("your inputs aren't the same length")
+  }
+  is.na(x) & is.na(y)
+}
+
+
+
+```
+Function : na.number = how many both true 
+            na. which = where is the both true 
+```{r}
+rescale_new <- function(x, y) {
+  ## Print some info on where NA's are as well as the number of them 
+  if(length(x) != length(y)) {
+    stop("Input x and y should be vectors of the same length", call.=FALSE)
+  }
+  
+  na.in.both <- ( is.na(x) & is.na(y) )
+  na.number <- sum(na.in.both)
+  na.which <- which(na.in.both)
+  
+  message("Found ", na.number, " NA's at position(s):", 
+          paste(na.which, collapse=", ") ) 
+  
+  return( list(number=na.number, which=na.which) )
+}
+
+rescale_new(x,y)
+
+```
+
+```{r}
+x <- df1$IDs
+y <- df2$IDs
+
+intersect(x,y)
+
+ ## what elements of x exists in y = TRUE 
+x %in% y
+
+  ## print out the subset of intersected as TRUE
+x[x %in% y]
+
+  ## how about y ?
+y%in%x
+y[y%in%x]
+
+cbind(x[x%in%y],y[y%in%x])
+```
+
+Make a function!
+```{r}
+gene_intersect <- function(x, y) {
+  cbind(x[x%in%y],y[y%in%x])
+}
+
+
+## modificaiton of the function with subset 
+gene_intersect2 <- function(df1,df2) {
+  cbind(df1[df1$IDs %in% df2$IDs,],
+        df2[df2$IDs %in% df1$IDs,], "exp")
+}
+
+
+
+
+## modificaiton
+colnames(df1) <- c("new_name", "exp")
+colnames(df2) <- c("new_name", "exp")
+colnames(df3) <- c("new-name", "exp")
+
+gene_intersect3 <- function(df1,df2, gene.colname = "IDs") {
+  cbind(df1[df1[,gene.colname] %in% df2[,gene.colname],],
+        df2[df2[,gene.colname] %in% df1[,gene.colname],], "exp")
+}
+
+## modification SIMPLE AND CLEAR WAY!!!
+gene_intersect4 <- function(df1,df2, gene.colname = "IDs") {
+    df1.name <- df1[,gene.colname] #this here reurns a name
+    df2.name <- df2[,gene.colname]
+    
+    df1.inds <- df1.name %in% df2.name
+    df2.inds <- df2.name %in% df1.name
+    
+  cbind(df1[df1.inds,],
+        df2[df2.inds,], "exp")
+}
+
+gene_intersect4(df1,df2,gene.colname = "new_name" )4
+```
+
+CRAN & BIOCONDUCTOR & ggplot2
+
+##ggplot only takes dataframe file 
+
+```{r}
+library(ggplot2)
+dim(iris) # a built-in data set
+class(iris)
+head(iris)
+levels(iris$Species)
+```
+## Aestethic of ggpolot2 
+how your data are represented viusally 
+which data on the x, which data on the y
+
+```{r}
+myplot <- ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) #initialize a ggplot object 
+class(myplot)
+```
+
+##Geometry
+the genometic objects(pointsm lines, polygons) in the plot
+shortcut function: geom point(), geom bar(), geom line()
+```{r}
+ggplot(data = iris, aes(x=Sepal.Length, y = Sepal.Width, color = Species))+ geom_point(aes(shape = Species), size=2) + geom_smooth(method = "lm")
+```
+
+```{r}
+ggplot(iris, aes(Sepal.Length,fill=Species))+geom_bar(stat='count',binwidth = 0.3,alpha=0.7)
+```
+
+
+gg plot cheat sheet -> gives when to use the ggplot 
